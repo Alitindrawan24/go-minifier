@@ -1,0 +1,2 @@
+# go-minifier
+Go Minifier
