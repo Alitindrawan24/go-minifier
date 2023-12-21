@@ -6,7 +6,13 @@ Go Minifier is is a lightweight command-line tool designed to simplify and strea
 - Go
 
 ### 2. Installation & Setup
-- Clone project from the repository using http
+
+- Install Go Minifier to using directly from command line
+```bash
+go install github.com/Alitindrawan24/go-minifier
+```
+
+- For local development, clone project from the repository using http
 ```bash
 git clone https://github.com/Alitindrawan24/go-minifier.git
 ```
