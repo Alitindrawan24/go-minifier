@@ -8,19 +8,13 @@ import (
 )
 
 type CssMinifier struct {
-	Minifier
+	*Minifier
 }
 
-func NewCssMinifier(minifier Minifier) MinifierInterface {
+func NewCssMinifier(minifier *Minifier) MinifierInterface {
 	return &CssMinifier{
 		Minifier: minifier,
 	}
-}
-
-func (minifier *CssMinifier) RemoveComments() {
-	// Remove block comments
-	blockCommentRegex := regexp.MustCompile(`/\*.*?\*/`)
-	minifier.Content = blockCommentRegex.ReplaceAllString(minifier.Content, "")
 }
 
 func (minifier *CssMinifier) ReadFile() {
@@ -31,11 +25,17 @@ func (minifier *CssMinifier) ReadFile() {
 	minifier.Content = string(content)
 }
 
+func (minifier *CssMinifier) Minify() {
+	minifier.removeComments()
+	minifier.removeWhiteSpace()
+}
+
 func (minifier *CssMinifier) WriteFile() {
 	outputFilename := minifier.OutputFilename
-	if outputFilename == "" {
+	if minifier.OutputFilename == "" {
 		outputFilename = strings.Replace(minifier.InputFilename, ".css", ".min.css", 1)
 	}
+	minifier.OutputFilename = outputFilename
 
 	err := os.WriteFile(outputFilename, []byte(minifier.Content), 0644)
 	if err != nil {
@@ -43,7 +43,13 @@ func (minifier *CssMinifier) WriteFile() {
 	}
 }
 
-func (minifier *CssMinifier) RemoveWhiteSpace() {
+func (minifier *CssMinifier) removeComments() {
+	// Remove block comments
+	blockCommentRegex := regexp.MustCompile(`/\*.*?\*/`)
+	minifier.Content = blockCommentRegex.ReplaceAllString(minifier.Content, "")
+}
+
+func (minifier *CssMinifier) removeWhiteSpace() {
 	// Remove extra white spaces and newlines
 	str := strings.Join(strings.Fields(minifier.Content), " ")
 	str = strings.ReplaceAll(str, "{ ", "{")
