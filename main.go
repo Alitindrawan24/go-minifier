@@ -8,9 +8,9 @@ import (
 )
 
 type MinifierInterface interface {
-	ReadFile()
-	Minify()
-	WriteFile()
+	ReadFile() error
+	Minify() error
+	WriteFile() error
 }
 
 type Minifier struct {
@@ -39,10 +39,10 @@ func main() {
 	cssMinifier.Minify()
 	cssMinifier.WriteFile()
 
-	showInformation(minifier)
+	showInformation(&minifier)
 }
 
-func showInformation(minifier Minifier) {
+func showInformation(minifier *Minifier) {
 	fi, err := os.Stat(minifier.InputFilename)
 	if err != nil {
 		panic(err)
