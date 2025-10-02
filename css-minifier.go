@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"os"
 	"regexp"
 	"strings"
@@ -17,48 +16,58 @@ func NewCssMinifier(minifier *Minifier) MinifierInterface {
 	}
 }
 
-func (minifier *CssMinifier) ReadFile() {
+func (minifier *CssMinifier) ReadFile() error {
 	content, err := os.ReadFile(minifier.InputFilename)
 	if err != nil {
-		log.Fatal(err.Error())
+		return err
 	}
 	minifier.Content = string(content)
+	return nil
 }
 
-func (minifier *CssMinifier) Minify() {
-	minifier.removeComments()
-	minifier.removeWhiteSpace()
+func (minifier *CssMinifier) Minify() error {
+	err := minifier.removeComments()
+	if err != nil {
+		return err
+	}
+	err = minifier.removeWhiteSpace()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func (minifier *CssMinifier) WriteFile() {
+func (minifier *CssMinifier) WriteFile() error {
 	outputFilename := minifier.OutputFilename
-	if minifier.OutputFilename == "" {
+	if minifier.OutputFilename == "" || outputFilename == minifier.InputFilename {
 		outputFilename = strings.Replace(minifier.InputFilename, ".css", ".min.css", 1)
 	}
 	minifier.OutputFilename = outputFilename
 
 	err := os.WriteFile(outputFilename, []byte(minifier.Content), 0644)
 	if err != nil {
-		panic(err)
+		return err
 	}
+	return nil
 }
 
-func (minifier *CssMinifier) removeComments() {
+var blockCommentRegex = regexp.MustCompile(`(?s)/\*.*?\*/`) // For single-line and multi-line comments
+
+func (minifier *CssMinifier) removeComments() error {
 	// Remove block comments
-	blockCommentRegex := regexp.MustCompile(`/\*.*?\*/`)
 	minifier.Content = blockCommentRegex.ReplaceAllString(minifier.Content, "")
+	return nil
 }
 
-func (minifier *CssMinifier) removeWhiteSpace() {
-	// Remove extra white spaces and newlines
-	str := strings.Join(strings.Fields(minifier.Content), " ")
-	str = strings.ReplaceAll(str, "{ ", "{")
-	str = strings.ReplaceAll(str, " {", "{")
-	str = strings.ReplaceAll(str, "} ", "}")
-	str = strings.ReplaceAll(str, "; ", ";")
-	str = strings.ReplaceAll(str, ": ", ":")
-	str = strings.ReplaceAll(str, ", ", ",")
-	str = strings.ReplaceAll(str, ";}", "}")
+var spaceAroundSymbols = regexp.MustCompile(`\s*([{}:;,])\s*`)
+var spaceAroundQuotes = regexp.MustCompile(`\s+`)
+
+func (minifier *CssMinifier) removeWhiteSpace() error {
+	str := spaceAroundSymbols.ReplaceAllString(minifier.Content, "$1")
+	str = spaceAroundQuotes.ReplaceAllString(str, " ")
+	str = strings.ReplaceAll(str, " !important", "!important")
+	str = strings.TrimSpace(str)
 
 	minifier.Content = str
+	return nil
 }
