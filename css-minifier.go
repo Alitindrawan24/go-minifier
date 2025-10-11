@@ -10,12 +10,14 @@ type CssMinifier struct {
 	*Minifier
 }
 
+// NewCssMinifier creates a new instance of CssMinifier
 func NewCssMinifier(minifier *Minifier) MinifierInterface {
 	return &CssMinifier{
 		Minifier: minifier,
 	}
 }
 
+// ReadFile reads the content of the input file
 func (minifier *CssMinifier) ReadFile() error {
 	content, err := os.ReadFile(minifier.InputFilename)
 	if err != nil {
@@ -25,6 +27,7 @@ func (minifier *CssMinifier) ReadFile() error {
 	return nil
 }
 
+// Minify performs the minification process
 func (minifier *CssMinifier) Minify() error {
 	err := minifier.removeComments()
 	if err != nil {
@@ -37,6 +40,7 @@ func (minifier *CssMinifier) Minify() error {
 	return nil
 }
 
+// WriteFile writes the minified content to the output file
 func (minifier *CssMinifier) WriteFile() error {
 	outputFilename := minifier.OutputFilename
 	if minifier.OutputFilename == "" || outputFilename == minifier.InputFilename {
