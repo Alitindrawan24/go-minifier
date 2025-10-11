@@ -22,6 +22,7 @@ type Minifier struct {
 func main() {
 	pathSrc := flag.String("src", "", "Path source file")
 	pathOut := flag.String("out", "", "Path output file")
+	opt := flag.String("opt", "css", "Minifier option: 'css' for CSS minification, 'js' for JavaScript minification")
 
 	flag.Parse()
 	if *pathSrc == "" {
@@ -34,10 +35,18 @@ func main() {
 		Content:        "",
 	}
 
-	cssMinifier := NewCssMinifier(&minifier)
-	cssMinifier.ReadFile()
-	cssMinifier.Minify()
-	cssMinifier.WriteFile()
+	var minifierInstance MinifierInterface
+
+	switch *opt {
+	case "css":
+		minifierInstance = NewCssMinifier(&minifier)
+	case "js":
+		minifierInstance = NewJsMinifier(&minifier)
+	}
+
+	minifierInstance.ReadFile()
+	minifierInstance.Minify()
+	minifierInstance.WriteFile()
 
 	showInformation(&minifier)
 }
