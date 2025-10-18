@@ -1,11 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"regexp"
 	"strings"
 )
 
+// CssMinifier handles minification of CSS files.
 type CssMinifier struct {
 	*Minifier
 }
@@ -21,7 +23,7 @@ func NewCssMinifier(minifier *Minifier) MinifierInterface {
 func (minifier *CssMinifier) ReadFile() error {
 	content, err := os.ReadFile(minifier.InputFilename)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to read CSS file %s: %w", minifier.InputFilename, err)
 	}
 	minifier.Content = string(content)
 	return nil
@@ -29,14 +31,18 @@ func (minifier *CssMinifier) ReadFile() error {
 
 // Minify performs the minification process
 func (minifier *CssMinifier) Minify() error {
+	// Step 1: Remove all comments
 	err := minifier.removeComments()
 	if err != nil {
 		return err
 	}
+
+	// Step 2: Remove unnecessary whitespace
 	err = minifier.removeWhiteSpace()
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -50,22 +56,25 @@ func (minifier *CssMinifier) WriteFile() error {
 
 	err := os.WriteFile(outputFilename, []byte(minifier.Content), 0644)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to write minified CSS to %s: %w", outputFilename, err)
 	}
 	return nil
 }
 
-var blockCommentRegex = regexp.MustCompile(`(?s)/\*.*?\*/`) // For single-line and multi-line comments
+// blockCommentRegex matches CSS block comments (/* ... */)
+var blockCommentRegex = regexp.MustCompile(`(?s)/\*.*?\*/`)
 
+// removeComments removes all CSS block comments (/* ... */) from the content.
 func (minifier *CssMinifier) removeComments() error {
-	// Remove block comments
 	minifier.Content = blockCommentRegex.ReplaceAllString(minifier.Content, "")
 	return nil
 }
 
+// Regex patterns for whitespace optimization
 var spaceAroundSymbols = regexp.MustCompile(`\s*([{}:;,])\s*`)
 var spaceAroundQuotes = regexp.MustCompile(`\s+`)
 
+// removeWhiteSpace removes unnecessary spaces around symbols and inside the content.
 func (minifier *CssMinifier) removeWhiteSpace() error {
 	str := spaceAroundSymbols.ReplaceAllString(minifier.Content, "$1")
 	str = spaceAroundQuotes.ReplaceAllString(str, " ")
