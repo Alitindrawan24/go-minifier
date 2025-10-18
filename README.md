@@ -1,60 +1,130 @@
 # Go Minifier
 
-Go Minifier is a lightweight command-line tool designed to simplify and streamline the minification process for CSS and JavaScript files. Minification involves the removal of unnecessary characters and spaces from code, resulting in smaller file sizes that contribute to improved web page loading times.
+A lightweight command-line tool designed to simplify and streamline the minification process for CSS and JavaScript files. Minification involves the removal of unnecessary characters and spaces from code, resulting in smaller file sizes that contribute to improved web page loading times.
 
-### 1. Requirement
-- Go
+## 🚀 Quick Start
 
-### 2. Installation & Setup
+Get up and running in under 2 minutes:
 
-- Install Go Minifier directly from command line
+```bash
+# Install the tool
+go install github.com/Alitindrawan24/go-minifier
+
+# Minify a CSS file
+go-minifier -src styles.css
+
+# Minify a JavaScript file  
+go-minifier -src script.js -opt js
+```
+
+## 📋 Requirements
+
+- Go 1.19 or later
+
+## 🔧 Installation & Setup
+
+### Option 1: Direct Installation
 ```bash
 go install github.com/Alitindrawan24/go-minifier
 ```
 
-- For local development, clone project from the repository using http
+### Option 2: Local Development
+
+**Using HTTPS:**
 ```bash
 git clone https://github.com/Alitindrawan24/go-minifier.git
+cd go-minifier
 ```
 
-- Clone project from the repository if using ssh
-
+**Using SSH:**
 ```bash
 git clone git@github.com:Alitindrawan24/go-minifier.git
+cd go-minifier
 ```
 
-### 3. Usage
+## 📖 Usage
 
-#### Minify CSS Files
-- To minify a CSS file, run the following command. The minified file will be generated in the same directory with the same name but using `.min.css` extension
+### Minify CSS Files
 
+**Basic usage** - Creates `filename.min.css`:
 ```bash
-go run . -src filename.css
+go run . -src styles.css
 ```
 
-- To customize the output filename, run the following command
-
+**Custom output filename:**
 ```bash
-go run . -src filename.css -out custom.min.css
+go run . -src styles.css -out production.min.css
 ```
 
-#### Minify JavaScript Files
-- To minify a JavaScript file, run the following command. The minified file will be generated in the same directory with the same name but using `.min.js` extension
-
+**Working with multiple CSS files:**
 ```bash
-go run . -src filename.js -opt js
+# Minify multiple CSS files
+go run . -src main.css
+go run . -src components.css -out components.min.css
+go run . -src responsive.css -out responsive.min.css
 ```
 
-- To customize the output filename for JavaScript files, run the following command
+### Minify JavaScript Files
 
+**Basic usage** - Creates `filename.min.js`:
 ```bash
-go run . -src filename.js -out custom.min.js -opt js
+go run . -src script.js -opt js
 ```
 
-#### Command Line Options
-- `-src`: Path to the source file (required)
-- `-out`: Path to the output file (optional, defaults to input filename with .min extension)
-- `-opt`: Minifier option - 'css' for CSS files (default), 'js' for JavaScript files
+**Custom output filename:**
+```bash
+go run . -src app.js -out app.min.js -opt js
+```
 
-### 4. Todo
-- Minify all css/js in a directory
+**Working with multiple JavaScript files:**
+```bash
+# Minify multiple JS files
+go run . -src main.js -opt js
+go run . -src utils.js -out utils.min.js -opt js
+go run . -src vendor.js -out vendor.min.js -opt js
+```
+
+### Command Line Options
+
+| Option | Description | Required | Default |
+|--------|-------------|----------|---------|
+| `-src` | Path to the source file | ✅ | - |
+| `-out` | Path to the output file | ❌ | `filename.min.css/js` |
+| `-opt` | Minifier type (`css` or `js`) | ❌ | `css` |
+
+
+**Valid values for `-opt`:**
+- `css` - For CSS files (default)
+- `js` - For JavaScript files
+
+## 📊 Example Output
+
+After minification, you'll see file size statistics:
+
+```
+File styles.css original size: 15 KB
+File styles.min.css output size: 8 KB (reduced by 46.67%)
+```
+
+## 🛠️ Development
+
+### Running Tests
+```bash
+make test
+```
+
+### Code Formatting
+```bash
+make fmt
+```
+
+### Linting
+```bash
+make lint
+```
+
+## 📝 Todo
+
+- [ ] Minify all CSS/JS files in a directory
+- [ ] Batch processing capabilities
+- [ ] Additional file format support
