@@ -1,11 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"regexp"
 	"strings"
 )
 
+// JsMinifier handles minification of JavaScript files.
 type JsMinifier struct {
 	*Minifier
 }
@@ -21,7 +23,7 @@ func NewJsMinifier(minifier *Minifier) MinifierInterface {
 func (minifier *JsMinifier) ReadFile() error {
 	content, err := os.ReadFile(minifier.InputFilename)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to read JS file %s: %w", minifier.InputFilename, err)
 	}
 	minifier.Content = string(content)
 	return nil
@@ -29,14 +31,18 @@ func (minifier *JsMinifier) ReadFile() error {
 
 // Minify performs the minification process
 func (minifier *JsMinifier) Minify() error {
+	// Step 1: Remove all comments
 	err := minifier.removeComments()
 	if err != nil {
 		return err
 	}
+
+	// Step 2: Remove unnecessary whitespace
 	err = minifier.removeWhiteSpace()
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -50,18 +56,20 @@ func (minifier *JsMinifier) WriteFile() error {
 
 	err := os.WriteFile(outputFilename, []byte(minifier.Content), 0644)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to write minified JS to %s: %w", outputFilename, err)
 	}
 	return nil
 }
 
-var jsBlockCommentRegex = regexp.MustCompile(`(?s)/\*.*?\*/`) // For multi-line comments
+// jsBlockCommentRegex matches JS multi-line comments (/* ... */)
+var jsBlockCommentRegex = regexp.MustCompile(`(?s)/\*.*?\*/`)
 
+// removeComments removes all JS comments (both block and single-line)
 func (minifier *JsMinifier) removeComments() error {
-	// First remove block comments (/* ... */)
+	// Remove block comments first
 	minifier.Content = jsBlockCommentRegex.ReplaceAllString(minifier.Content, "")
 
-	// Then remove single-line comments, but only when not inside strings
+	// Then remove single-line comments, preserving // inside strings
 	minifier.Content = minifier.removeSingleLineComments(minifier.Content)
 	return nil
 }
@@ -110,9 +118,9 @@ func (minifier *JsMinifier) removeSingleLineComments(content string) string {
 			for i < len(chars) && chars[i] != '\n' {
 				i++
 			}
-			// Don't write the newline yet, let the whitespace removal handle it
+			// Don't write the newline yet, let whitespace removal handle it
 			if i < len(chars) {
-				i-- // Back up so the newline gets processed in the next iteration
+				i--
 			}
 			continue
 		}
@@ -124,15 +132,18 @@ func (minifier *JsMinifier) removeSingleLineComments(content string) string {
 	return result.String()
 }
 
+// Regex patterns for whitespace optimization
 var jsSpaceAroundOperators = regexp.MustCompile(`\s*([{}();,=+\-*/<>!&|:\[\]])\s*`)
 var jsMultipleSpaces = regexp.MustCompile(`\s+`)
 var jsLineBreaks = regexp.MustCompile(`\n+`)
 
+// removeWhiteSpace removes unnecessary spaces and line breaks in JS content
 func (minifier *JsMinifier) removeWhiteSpace() error {
 	str := jsSpaceAroundOperators.ReplaceAllString(minifier.Content, "$1")
 	str = jsMultipleSpaces.ReplaceAllString(str, " ")
 	str = jsLineBreaks.ReplaceAllString(str, "")
 	str = strings.TrimSpace(str)
+
 	minifier.Content = str
 	return nil
 }
